@@ -185,6 +185,36 @@ virtual-tour-creator/
 - [ ] Поделиться в облаке
 - [ ] Мобильное приложение
 
+### 🚀 Автоматическая сборка через GitHub Actions
+
+Приложение автоматически собирается при каждом пуше в репозиторий.
+
+#### Как получить готовый .exe:
+
+1. **Запушь код на GitHub:**
+```bash
+git remote add origin https://github.com/username/virtual-tour-creator.git
+git push -u origin master
+```
+
+2. **Создай тег для релиза** (опционально):
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+3. **Скачай готовый файл:**
+- Перейди в раздел **Actions** репозитория
+- Открой последний успешный workflow
+- В разделе **Artifacts** скачай `virtual-tour-creator-windows-latest`
+
+Или скачай из **Releases**, если создавал тег.
+
+#### Статус сборки:
+![Build Status](https://github.com/username/virtual-tour-creator/workflows/Build%20and%20Release/badge.svg)
+
+---
+
 ## 📄 Лицензия
 
 MIT License — свободное использование для личных и коммерческих проектов.

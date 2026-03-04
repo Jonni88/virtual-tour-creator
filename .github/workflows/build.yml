@@ -1,0 +1,73 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [windows-latest]
+        node-version: [18.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build
+
+    - name: Build and release Electron app
+      uses: samuelmeuli/action-electron-builder@v1
+      with:
+        build_script_name: "build"
+        args: "--publish=never"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: virtual-tour-creator-${{ matrix.os }}
+        path: |
+          dist-electron/*.exe
+          dist-electron/*.msi
+          dist-electron/win-unpacked/
+        if-no-files-found: ignore
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Download Windows artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: virtual-tour-creator-windows-latest
+        path: ./artifacts
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./artifacts/dist-electron/*
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
