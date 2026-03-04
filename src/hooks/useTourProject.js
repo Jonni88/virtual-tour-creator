@@ -339,6 +339,12 @@ function generateStandaloneHTML(tourData) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="${tourData.name} - Virtual 360° Tour">
   <title>${tourData.name}</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { 
@@ -346,7 +352,7 @@ function generateStandaloneHTML(tourData) {
       height: 100%; 
       overflow: hidden;
       background: #000;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     #canvas { 
       width: 100%; 
@@ -363,27 +369,43 @@ function generateStandaloneHTML(tourData) {
       top: 20px;
       left: 20px;
       color: white;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(10px);
-      padding: 16px 20px;
-      border-radius: 12px;
+      background: rgba(20, 20, 28, 0.85);
+      backdrop-filter: blur(20px);
+      padding: 20px 24px;
+      border-radius: 16px;
       pointer-events: none;
       border: 1px solid rgba(255,255,255,0.1);
-      max-width: 300px;
+      max-width: 360px;
       z-index: 100;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
     }
     
     #info h1 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     
     #info p {
       font-size: 13px;
-      opacity: 0.7;
-      line-height: 1.4;
+      opacity: 0.8;
+      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    #info p::before {
+      content: '';
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%233b82f6' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'/%3E%3C/svg%3E") no-repeat center;
+      background-size: contain;
     }
     
     #loading {
@@ -420,15 +442,29 @@ function generateStandaloneHTML(tourData) {
     
     #progress {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 24px;
+      right: 24px;
       color: white;
       font-size: 13px;
-      background: rgba(0,0,0,0.6);
-      padding: 10px 16px;
-      border-radius: 8px;
+      background: rgba(20,20,28,0.85);
+      backdrop-filter: blur(10px);
+      padding: 12px 18px;
+      border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.1);
       z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    #progress::before {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%233b82f6' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'/%3E%3C/svg%3E") no-repeat center;
+      background-size: contain;
     }
     
     .hotspot-marker {
