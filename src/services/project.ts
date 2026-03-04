@@ -7,17 +7,28 @@ export class ProjectService {
   private static autosaveTimer: ReturnType<typeof setInterval> | null = null;
   private static currentProjectPath: string | null = null;
   
+  // Сохранение проекта с копированием файлов
   static async saveProject(
     config: TourConfig,
-    path?: string
+    path?: string,
+    copyFiles: boolean = true
   ): Promise<{ success: boolean; path?: string; error?: string }> {
     try {
       const filePath = path || await window.electronAPI.saveProjectDialog();
       if (!filePath) return { success: false, error: 'Save cancelled' };
       
+      const projectDir = filePath.substring(0, filePath.lastIndexOf('\\') > -1 ? filePath.lastIndexOf('\\') : filePath.lastIndexOf('/'));
+      
+      let updatedConfig = config;
+      
+      // Копируем файлы в папку проекта
+      if (copyFiles) {
+        updatedConfig = await this.copyFilesToProject(config, projectDir);
+      }
+      
       const projectFile: ProjectFile = {
-        config,
-        originalFiles: config.scenes.map(s => s.fileName),
+        config: updatedConfig,
+        originalFiles: updatedConfig.scenes.map(s => s.fileName),
         exportedAt: new Date().toISOString()
       };
       
@@ -32,6 +43,78 @@ export class ProjectService {
     }
   }
   
+  // Копирование файлов панорам в папку проекта
+  private static async copyFilesToProject(
+    config: TourConfig, 
+    projectDir: string
+  ): Promise<TourConfig> {
+    const panoDir = `${projectDir}/pano_sources`;
+    await window.electronAPI.ensureDir(panoDir);
+    
+    const updatedScenes = [...config.scenes];
+    
+    for (let i = 0; i < updatedScenes.length; i++) {
+      const scene = updatedScenes[i];
+      
+      // Если путь уже относительный — пропускаем
+      if (scene.fileName.startsWith('./') || scene.fileName.startsWith('pano_sources/')) {
+        continue;
+      }
+      
+      // Копируем файл в папку проекта
+      const fileName = `pano_${i + 1}_${this.sanitizeFileName(scene.name)}.jpg`;
+      const targetPath = `${panoDir}/${fileName}`;
+      
+      try {
+        await window.electronAPI.copyFile(scene.fileName, targetPath);
+        
+        // Обновляем путь на относительный
+        updatedScenes[i] = {
+          ...scene,
+          fileName: `./pano_sources/${fileName}`
+        };
+      } catch (err) {
+        console.error('Failed to copy file:', err);
+        // Оставляем оригинальный путь
+      }
+    }
+    
+    return {
+      ...config,
+      scenes: updatedScenes
+    };
+  }
+  
+  // Преобразование относительных путей в абсолютные при загрузке
+  private static async resolvePaths(
+    config: TourConfig, 
+    projectDir: string
+  ): Promise<TourConfig> {
+    const resolvedScenes = config.scenes.map(scene => {
+      if (scene.fileName.startsWith('./') || scene.fileName.startsWith('pano_sources/')) {
+        const relativePath = scene.fileName.replace('./', '');
+        return {
+          ...scene,
+          fileName: `${projectDir}/${relativePath}`
+        };
+      }
+      return scene;
+    });
+    
+    return {
+      ...config,
+      scenes: resolvedScenes
+    };
+  }
+  
+  private static sanitizeFileName(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '_')
+      .slice(0, 30);
+  }
+  
   static async loadProject(): Promise<{ success: boolean; config?: TourConfig; error?: string }> {
     try {
       const filePath = await window.electronAPI.loadProjectDialog();
@@ -42,8 +125,14 @@ export class ProjectService {
       
       const projectFile: ProjectFile = JSON.parse(result.data!);
       
+      // Определяем папку проекта
+      const projectDir = filePath.substring(0, filePath.lastIndexOf('\\') > -1 ? filePath.lastIndexOf('\\') : filePath.lastIndexOf('/'));
+      
+      // Преобразуем относительные пути в абсолютные
+      let config = await this.resolvePaths(projectFile.config, projectDir);
+      
       // Проверяем версию и мигрируем если нужно
-      const config = this.migrateConfig(projectFile.config);
+      config = this.migrateConfig(config);
       
       this.currentProjectPath = filePath as string;
       await this.addToRecent(filePath as string);
