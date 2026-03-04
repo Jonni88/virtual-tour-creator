@@ -21,11 +21,10 @@ export class ProjectService {
         exportedAt: new Date().toISOString()
       };
       
-      await window.electronAPI.writeFile(filePath, JSON.stringify(projectFile, null, 2));
+      await window.electronAPI.writeFile(filePath as string, JSON.stringify(projectFile, null, 2));
       
-      this.currentProjectPath = filePath;
-      // @ts-ignore
-      await this.addToRecent(filePath);
+      this.currentProjectPath = filePath as string;
+      await this.addToRecent(filePath as string);
       
       return { success: true, path: filePath };
     } catch (error) {
@@ -38,17 +37,16 @@ export class ProjectService {
       const filePath = await window.electronAPI.loadProjectDialog();
       if (!filePath) return { success: false, error: 'Load cancelled' };
       
-      const result = await window.electronAPI.readFile(filePath);
+      const result = await window.electronAPI.readFile(filePath as string);
       if (!result.success) return { success: false, error: result.error };
       
-      const projectFile: ProjectFile = JSON.parse(result.data);
+      const projectFile: ProjectFile = JSON.parse(result.data!);
       
       // Проверяем версию и мигрируем если нужно
       const config = this.migrateConfig(projectFile.config);
       
-      this.currentProjectPath = filePath;
-      // @ts-ignore
-      await this.addToRecent(filePath);
+      this.currentProjectPath = filePath as string;
+      await this.addToRecent(filePath as string);
       
       return { success: true, config };
     } catch (error) {
@@ -62,7 +60,7 @@ export class ProjectService {
     if (!result.success) return { success: false, error: result.error };
     
     try {
-      const projectFile: ProjectFile = JSON.parse(result.data);
+      const projectFile: ProjectFile = JSON.parse(result.data!);
       return { success: true, config: this.migrateConfig(projectFile.config) };
     } catch (error) {
       return { success: false, error: 'Invalid project file' };
