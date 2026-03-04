@@ -49,7 +49,18 @@ class HistoryManager {
 
 export function useTourProject() {
   const [project, setProject] = useState({
-    name: 'New Tour',
+    name: 'Новый тур',
+    propertyInfo: {
+      title: '',
+      price: '',
+      area: '',
+      rooms: '',
+      address: '',
+      description: '',
+      contactName: '',
+      contactPhone: '',
+      contactEmail: ''
+    },
     panoramas: [],
     hotspots: [],
     basePath: null,
@@ -279,6 +290,17 @@ export function useTourProject() {
     }));
   }, []);
 
+  const updatePropertyInfo = useCallback((updates) => {
+    setProject(prev => {
+      const newProject = {
+        ...prev,
+        propertyInfo: { ...prev.propertyInfo, ...updates }
+      };
+      saveToHistory(newProject);
+      return newProject;
+    });
+  }, [saveToHistory]);
+
   return {
     project,
     selectedPanorama,
@@ -300,6 +322,7 @@ export function useTourProject() {
     exportTour,
     togglePreviewMode,
     updateProjectName,
+    updatePropertyInfo,
     setSelectedHotspotType
   };
 }

@@ -4,6 +4,8 @@ import PanoramaList from './components/PanoramaList';
 import PanoramaViewer from './components/PanoramaViewer';
 import HotspotEditor from './components/HotspotEditor';
 import Toolbar from './components/Toolbar';
+import PropertyInfo from './components/PropertyInfo';
+import MiniMap from './components/MiniMap';
 
 function App() {
   const {
@@ -14,6 +16,7 @@ function App() {
     selectPanorama,
     addHotspot,
     removeHotspot,
+    updatePropertyInfo,
     getPanoramaHotspots,
     saveProject,
     loadProject,
@@ -40,7 +43,7 @@ function App() {
 
   const confirmHotspot = (targetPanoramaId, label) => {
     if (selectedPanorama && pendingHotspotPosition) {
-      addHotspot(selectedPanorama.id, pendingHotspotPosition, targetPanoramaId, label);
+      addHotspot('transition', pendingHotspotPosition, targetPanoramaId, label);
     }
     setShowTargetSelector(false);
     setPendingHotspotPosition(null);
@@ -93,12 +96,26 @@ function App() {
           )}
         </div>
 
-        <HotspotEditor
-          hotspots={project.hotspots}
-          panoramas={project.panoramas}
-          currentPanorama={selectedPanorama}
-          onRemoveHotspot={removeHotspot}
-        />
+        <div className="w-80 flex flex-col gap-4 overflow-y-auto">
+          <PropertyInfo 
+            propertyInfo={project.propertyInfo} 
+            onUpdate={updatePropertyInfo} 
+          />
+          
+          <MiniMap
+            panoramas={project.panoramas}
+            selectedPanorama={selectedPanorama}
+            onSelectPanorama={selectPanorama}
+            hotspots={project.hotspots}
+          />
+          
+          <HotspotEditor
+            hotspots={project.hotspots}
+            panoramas={project.panoramas}
+            currentPanorama={selectedPanorama}
+            onRemoveHotspot={removeHotspot}
+          />
+        </div>
       </div>
 
       {showTargetSelector && (
