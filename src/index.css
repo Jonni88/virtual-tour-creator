@@ -2,13 +2,148 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --bg-primary: #0f0f12;
+    --bg-secondary: #18181b;
+    --bg-tertiary: #232329;
+    --bg-glass: rgba(24, 24, 27, 0.85);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-primary: #fafafa;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    --accent-primary: #3b82f6;
+    --accent-secondary: #8b5cf6;
+    --accent-success: #22c55e;
+    --accent-warning: #f59e0b;
+    --accent-danger: #ef4444;
+    --hotspot-color: #f97316;
+    --hotspot-hover: #fb923c;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+    --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl;
+    box-shadow: var(--shadow-lg), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  .glass-panel-hover {
+    @apply glass-panel transition-all duration-200;
+  }
+  
+  .glass-panel-hover:hover {
+    @apply bg-white/10 border-white/20;
+    box-shadow: var(--shadow-lg), inset 0 1px 0 0 rgba(255, 255, 255, 0.1), var(--shadow-glow);
+  }
+  
+  .btn-primary {
+    @apply px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-medium rounded-lg transition-all duration-200;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  
+  .btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(59, 130, 246, 0.4);
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 bg-white/10 hover:bg-white/15 text-zinc-200 font-medium rounded-lg transition-all duration-200 border border-white/10;
+  }
+  
+  .btn-secondary:hover {
+    @apply bg-white/20 border-white/20;
+  }
+  
+  .btn-active {
+    @apply px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-lg;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  
+  .input-field {
+    @apply px-3 py-2 bg-black/30 border border-white/10 rounded-lg text-zinc-100 text-sm transition-all duration-200;
+    @apply focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20;
+  }
+  
+  .input-field::placeholder {
+    @apply text-zinc-500;
+  }
+  
+  .hotspot-marker {
+    @apply absolute w-8 h-8 flex items-center justify-center;
+    animation: pulse-hotspot 2s ease-in-out infinite;
+  }
+  
+  .hotspot-marker::before {
+    content: '';
+    @apply absolute inset-0 rounded-full bg-orange-500/30;
+    animation: ripple 2s ease-out infinite;
+  }
+  
+  .hotspot-marker-inner {
+    @apply relative w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-orange-600;
+    box-shadow: 0 0 10px rgba(249, 115, 22, 0.6);
+  }
+  
+  .info-hotspot-marker {
+    @apply relative w-6 h-6 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+    animation: pulse-blue 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-hotspot {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes pulse-blue {
+  0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.6); }
+  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.9); }
+}
+
+@keyframes ripple {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+/* Base styles */
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  background: #0d1117;
-  color: #e6edf3;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
@@ -16,33 +151,80 @@ body {
   height: 100vh;
 }
 
-/* Scrollbar styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #161b22;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #30363d;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #484f58;
+  background: rgba(255, 255, 255, 0.25);
 }
 
-/* Canvas container */
+/* Selection */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+/* Drag and drop */
+.drag-over {
+  border: 2px dashed var(--accent-primary) !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Toast notifications */
+.toast {
+  @apply fixed bottom-4 right-4 px-4 py-3 rounded-lg text-sm font-medium;
+  @apply backdrop-blur-xl bg-white/10 border border-white/20;
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.toast-success {
+  @apply border-green-500/50 bg-green-500/10 text-green-400;
+}
+
+.toast-error {
+  @apply border-red-500/50 bg-red-500/10 text-red-400;
+}
+
+/* Loading spinner */
+.spinner {
+  @apply w-5 h-5 border-2 border-white/20 border-t-blue-500 rounded-full;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Canvas */
 .canvas-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
+  @apply w-full h-full relative overflow-hidden;
 }
 
 .canvas-container canvas {
-  display: block;
-  outline: none;
+  @apply block outline-none;
+}
+
+/* Tooltip */
+.tooltip {
+  @apply absolute px-2 py-1 bg-black/80 text-white text-xs rounded pointer-events-none z-50;
+  @apply backdrop-blur-sm;
+  white-space: nowrap;
+}
+
+/* Focus styles */
+button:focus-visible,
+input:focus-visible {
+  @apply outline-none ring-2 ring-blue-500/50 ring-offset-2 ring-offset-zinc-900;
 }

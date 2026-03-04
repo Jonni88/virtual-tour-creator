@@ -1,19 +1,25 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { exec } = require('child_process');
 
 let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
+    width: 1600,
+    height: 1000,
+    minWidth: 1200,
+    minHeight: 700,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      webSecurity: false
     },
-    titleBarStyle: 'default'
+    titleBarStyle: 'hiddenInset',
+    vibrancy: 'under-window',
+    visualEffectState: 'active'
   });
 
   // Load the app
@@ -23,6 +29,12 @@ function createWindow() {
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
+
+  // Handle external links
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
 }
 
 app.whenReady().then(createWindow);
@@ -113,6 +125,16 @@ ipcMain.handle('fs:scanFolder', async (event, folderPath) => {
 ipcMain.handle('fs:ensureDir', async (event, dirPath) => {
   try {
     fs.mkdirSync(dirPath, { recursive: true });
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+// Open folder/file in system explorer
+ipcMain.handle('shell:openPath', async (event, targetPath) => {
+  try {
+    await shell.openPath(targetPath);
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };
