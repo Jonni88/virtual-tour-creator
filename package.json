@@ -2,7 +2,8 @@
   "name": "virtual-tour-creator",
   "version": "1.0.0",
   "description": "Create virtual 360° tours from Insta360 X4 photos",
-  "main": "electron/main.js",
+  "main": "electron/main.cjs",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -38,7 +39,8 @@
     },
     "files": [
       "dist/**/*",
-      "electron/**/*"
+      "electron/**/*",
+      "package.json"
     ],
     "mac": {
       "category": "public.app-category.photography"
