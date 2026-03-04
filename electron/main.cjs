@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { exec } = require('child_process');
+const sharp = require('sharp');
 
 let mainWindow;
 
@@ -168,11 +168,44 @@ ipcMain.handle('dialog:getExportPath', async () => {
 
 ipcMain.handle('fs:processImage', async (event, options) => {
   try {
-    // Placeholder for image processing
-    fs.copyFileSync(options.source, options.target);
+    const { source, target, maxWidth, quality } = options;
+    
+    // Если Original — просто копируем
+    if (maxWidth > 15000) {
+      fs.copyFileSync(source, target);
+      return { success: true };
+    }
+    
+    // Получаем метаданные изображения
+    const metadata = await sharp(source).metadata();
+    const originalWidth = metadata.width || 8000;
+    
+    // Определяем новый размер
+    const targetWidth = Math.min(originalWidth, maxWidth);
+    
+    // Обрабатываем изображение
+    await sharp(source)
+      .resize(targetWidth, null, { 
+        withoutEnlargement: true,
+        fit: 'inside'
+      })
+      .jpeg({ 
+        quality: Math.round(quality * 100),
+        progressive: true,
+        mozjpeg: true
+      })
+      .toFile(target);
+    
     return { success: true };
   } catch (err) {
-    return { success: false, error: err.message };
+    console.error('Image processing error:', err);
+    // В случае ошибки просто копируем оригинал
+    try {
+      fs.copyFileSync(options.source, options.target);
+      return { success: true };
+    } catch (copyErr) {
+      return { success: false, error: err.message };
+    }
   }
 });
 
