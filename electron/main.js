@@ -14,7 +14,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.cjs'),
+      preload: path.join(__dirname, 'preload.js'),
       webSecurity: false
     },
     titleBarStyle: 'hiddenInset',
@@ -138,5 +138,66 @@ ipcMain.handle('shell:openPath', async (event, targetPath) => {
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };
+  }
+});
+
+// New IPC handlers for v2.0
+ipcMain.handle('dialog:saveProjectDialog', async () => {
+  const result = await dialog.showSaveDialog(mainWindow, {
+    filters: [{ name: 'Virtual Tour Project', extensions: ['vtour.json'] }],
+    defaultPath: 'project.vtour.json'
+  });
+  return result.filePath;
+});
+
+ipcMain.handle('dialog:loadProjectDialog', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    filters: [{ name: 'Virtual Tour Project', extensions: ['vtour.json'] }],
+    properties: ['openFile']
+  });
+  return result.filePaths[0];
+});
+
+ipcMain.handle('dialog:getExportPath', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory'],
+    title: 'Выберите папку для экспорта'
+  });
+  return result.filePaths[0];
+});
+
+ipcMain.handle('fs:processImage', async (event, options) => {
+  try {
+    // Placeholder for image processing
+    fs.copyFileSync(options.source, options.target);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+// Store for recent projects (simple file-based)
+const storePath = path.join(app.getPath('userData'), 'store.json');
+
+ipcMain.handle('store:get', async (event, key) => {
+  try {
+    if (!fs.existsSync(storePath)) return null;
+    const store = JSON.parse(fs.readFileSync(storePath, 'utf8'));
+    return store[key];
+  } catch {
+    return null;
+  }
+});
+
+ipcMain.handle('store:set', async (event, key, value) => {
+  try {
+    let store = {};
+    if (fs.existsSync(storePath)) {
+      store = JSON.parse(fs.readFileSync(storePath, 'utf8'));
+    }
+    store[key] = value;
+    fs.writeFileSync(storePath, JSON.stringify(store, null, 2));
+  } catch (err) {
+    console.error('Store error:', err);
   }
 });
